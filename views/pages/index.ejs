@@ -20,17 +20,22 @@
     <div class="booksContainer">
         
         <% books.forEach( book=> { %>
-            <div id= <%= book.id %> >
-                <img src= <%= book.image_url %>  />
-                <h3> <%= book.title %> </h3>
-                <h4><%= book.author %></h4>
-                <p class="isbn"><%= book.isbn %>   </p>
-            </div>
+                <form action="/details/<%= book.id %>" method="GET" >
+                    <div id= <%= book.id %> >
+                        <img src= <%= book.image_url %>  />
+                        <h3> <%= book.title %> </h3>
+                        <h4><%= book.author %></h4>
+                        <p class="isbn"><%= book.isbn %>   </p>
+                        <input type="submit" class="blackButton" value="View Details" >
+                    </div>
+                
+                </form>
+            
 
        <% }) %>
 
           
-       </div>
+    </div>
 
 
     

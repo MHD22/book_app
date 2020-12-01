@@ -4,15 +4,19 @@
 require('dotenv').config();
 const express =require('express');
 const superagent = require('superagent');
+const cors = require('cors');
 const pg = require('pg');
+const methodOverride = require('method-override');
 
 
 // app setup :
 const PORT = process.env.PORT || 3000;
 const app = express();  
+app.use(cors());
 app.use(express.static('./public'));
 app.set('view engine','ejs');
 app.use(express.urlencoded({extended:true}));
+app.use(methodOverride('_method'));
 const client = new pg.Client(process.env.DATABASE_URL);
 
 //routes:
@@ -20,7 +24,9 @@ app.get('/',getAllbooks);
 app.post('/postBookData', storeBook);
 app.get ('/details/:id',displayDetails);
 app.get('/searches/new',displayForm);
-app.post('/searches',getBooksFromAPI)
+app.post('/searches',getBooksFromAPI);
+app.put('/updateBook/:id', updateBookHandler);
+app.delete('/deleteBook/:id',deleteBookHandler)
 
 //constructors:
 
@@ -80,6 +86,32 @@ function displayDetails(req,res) {
     .catch(e=>{errorHandler('Error while getting the data from DB'+e,req,res)});
 
    
+}
+
+
+function updateBookHandler(req,res){
+   
+    let {image_url,title,author,isbn,description}= req.body;
+    let id = req.params.id;
+    let SQL = `UPDATE books SET image_url=$1,title=$2,author=$3,isbn=$4,description=$5 WHERE id=$6`
+    let safeVales=[image_url,title,author,isbn,description,id];
+    client.query(SQL,safeVales).then(()=>{
+        res.redirect(`/details/${id}`);
+    })
+    .catch(error=>{ errorHandler(error,req,res)});
+    
+}
+
+function deleteBookHandler(req,res){
+    let id = req.params.id;
+    let SQL =`DELETE FROM books WHERE id = $1`;
+    let value = [id];
+    client.query(SQL,value).then(data=>{
+        
+        res.redirect('/')
+    }
+    )
+    .catch(e=>{errorHandler(e,req,res)});
 }
 
 function errorHandler(error,req,res){
